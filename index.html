@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Le congiunzioni – esercizi</title>
+<style>
+:root{--bg:#faf8f4;--fg:#1d2330;--mu:#667085;--card:#fff;--bd:#d9d4c8;--ac:#2f5d8a;--ok:#1f7a4d;--okb:#e1f4e9;--ko:#b3261e;--kob:#fbe4e2;--mk:#fde9a8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171d;--fg:#eceff4;--mu:#98a2b3;--card:#1e232c;--bd:#38404d;--ac:#7fb0e0;--ok:#6fd49a;--okb:#16372a;--ko:#ff8a80;--kob:#43201d;--mk:#5a4a12}}
+:root[data-theme="dark"]{--bg:#14171d;--fg:#eceff4;--mu:#98a2b3;--card:#1e232c;--bd:#38404d;--ac:#7fb0e0;--ok:#6fd49a;--okb:#16372a;--ko:#ff8a80;--kob:#43201d;--mk:#5a4a12}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.5 Georgia,'Times New Roman',serif}
+main{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:1.35rem;margin:.2em 0}.sub,.note,.bar,details,select,button{font-family:system-ui,sans-serif}
+.sub{color:var(--mu);font-size:14px;margin:0 0 12px}.note{font-size:13px;color:var(--mu)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:14px;margin-bottom:12px}
+select,button{font-size:15px;border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:8px;padding:8px 10px}
+button.p{background:var(--ac);color:var(--bg);border-color:var(--ac);font-weight:600}button:disabled{opacity:.45}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
+.fr{font-size:1.15rem;line-height:1.7}mark{background:var(--mk);color:inherit;padding:1px 4px;border-radius:5px}sup{font:600 11px system-ui,sans-serif;margin-left:2px}
+.chunks{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.ch{flex:1 1 200px;border:1.5px solid var(--bd);border-radius:10px;padding:8px}.ch b{display:block;margin-bottom:6px}.ch select{width:100%;margin-bottom:6px}
+.ch.ok{border-color:var(--ok);background:var(--okb)}.ch.ko{border-color:var(--ko);background:var(--kob)}
+.sol{font:13px system-ui,sans-serif;color:var(--ko)}.res{font:15px system-ui,sans-serif;margin:12px 0}
+details{font-size:14px}summary{cursor:pointer;color:var(--ac)}dl{margin:8px 0}dt{font-weight:600;margin-top:8px}dd{margin:0;color:var(--mu)}
+</style></head><body><main>
+<h1>Le congiunzioni</h1>
+<p class="sub">Le congiunzioni sono evidenziate e numerate. Per ognuna indica se è <b>coordinante</b> o <b>subordinante</b> e di che tipo, poi premi “Verifica”.</p>
+<div class="bar"><label>Frasi <select id="lv"><option value="0">Tutte</option><option value="1">Solo coordinanti</option><option value="2">Solo subordinanti</option><option value="3">Miste (coordinanti e subordinanti)</option></select></label><span id="pt"></span></div>
+<div id="app"></div>
+<details class="card"><summary>Le mie difficoltà</summary><div id="st"></div><button onclick="resetSt()" style="margin-top:8px">Azzera</button><p class="note">I dati restano solo su questo dispositivo.</p></details>
+<details class="card"><summary>Schema delle congiunzioni</summary><dl id="ref"></dl></details>
+</main>
+<script>
+const T={
+cop:["Copulativa","c","Aggiunge un elemento a un altro (e, anche, inoltre, né)."],
+dis:["Disgiuntiva","c","Presenta due alternative (o, oppure, ovvero)."],
+avv:["Avversativa","c","Contrappone due elementi (ma, però, tuttavia, anzi, eppure)."],
+con:["Conclusiva","c","Introduce una conseguenza o una conclusione (dunque, quindi, perciò, pertanto)."],
+esp:["Esplicativa","c","Spiega o precisa quanto detto prima (infatti, cioè, ossia)."],
+cor:["Correlativa","c","Fa parte di una coppia che lavora insieme (sia… sia, né… né, o… o, non solo… ma anche)."],
+cau:["Causale","s","Introduce la causa (perché, poiché, siccome, dato che)."],
+fin:["Finale","s","Introduce lo scopo (affinché, perché + congiuntivo)."],
+cns:["Consecutiva","s","Introduce la conseguenza (che dopo tanto, così, talmente)."],
+tem:["Temporale","s","Indica quando avviene l’azione (quando, mentre, appena, finché, dopo che, prima che)."],
+cnc:["Concessiva","s","Introduce un ostacolo che non impedisce il fatto (benché, sebbene, anche se)."],
+cnd:["Condizionale","s","Introduce una condizione (se, qualora, purché, a condizione che)."],
+mod:["Modale","s","Indica il modo in cui avviene l’azione (come)."],
+cmp:["Comparativa","s","Introduce un confronto (di quanto, quanto, come)."],
+dic:["Dichiarativa (completiva)","s","Introduce ciò che si dice, si pensa o si crede (che)."],
+int:["Interrogativa indiretta","s","Introduce una domanda riportata, senza punto interrogativo (se)."]};
+const GN={c:"coordinante",s:"subordinante"};
+const S=[
+"Marco ha studiato molto [e|cop] ha superato l’esame.",
+"Vuoi un tè [o|dis] preferisci un caffè?",
+"Era stanco, [ma|avv] ha continuato a lavorare.",
+"Ha piovuto tutta la notte, [quindi|con] le strade sono allagate.",
+"Il treno è in ritardo, [infatti|esp] nessuno è ancora arrivato.",
+"Non ho incontrato [né|cor] Luca [né|cor] Anna.",
+"[Sia|cor] Marco [sia|cor] Giulia parteciperanno alla gara.",
+"[O|cor] studi [o|cor] cerchi un lavoro.",
+"[Non solo|cor] Anna ha studiato, [ma anche|cor] ha aiutato i compagni.",
+"Luca è partito, [perciò|con] non lo vedrai prima di giovedì.",
+"Non vuole studiare, [anzi|avv] vuole lasciare la scuola.",
+"Il suo hobby è il bricolage, [cioè|esp] costruisce piccoli oggetti di legno.",
+"Studia con attenzione, [eppure|avv] non riesce a ricordare.",
+"Resto a casa [perché|cau] sono raffreddato.",
+"Ti scrivo [affinché|fin] tu sappia la verità.",
+"Ho lasciato la porta aperta [perché|fin] i ragazzi potessero entrare.",
+"Era così stanco [che|cns] si addormentò subito.",
+"Ha studiato tanto [che|cns] ha preso il massimo dei voti.",
+"[Quando|tem] il professore entrò, gli studenti si alzarono.",
+"[Mentre|tem] Luca cucinava, Anna apparecchiava la tavola.",
+"[Appena|tem] arrivò a casa, Luca telefonò alla madre.",
+"[Dopo che|tem] ebbe finito di mangiare, Luca uscì.",
+"[Prima che|tem] il sole tramonti, torneremo a casa.",
+"[Finché|tem] resterai qui, sarai al sicuro.",
+"[Sebbene|cnc] fosse molto stanco, Marco finì il lavoro.",
+"[Benché|cnc] piovesse, siamo usciti lo stesso.",
+"[Anche se|cnc] ho studiato molto, non ho superato la prova.",
+"[Se|cnd] domani farà bel tempo, andremo al mare.",
+"[Qualora|cnd] tu abbia bisogno, chiamami.",
+"Ti aiuterò [purché|cnd] tu studi.",
+"Ti presto il libro [a condizione che|cnd] tu me lo restituisca lunedì.",
+"[Dato che|cau] nessuno rispondeva, il professore uscì dall’aula.",
+"[Siccome|cau] era tardi, siamo tornati a casa.",
+"[Poiché|cau] il tempo era brutto, abbiamo rinviato la gita.",
+"Ha fatto [come|mod] gli avevamo detto.",
+"Luca è meno stanco [di quanto|cmp] sembri.",
+"Maria è alta [quanto|cmp] sua sorella.",
+"Penso [che|dic] tu abbia ragione.",
+"Non so [se|int] Luca verrà alla festa.",
+"Parlava piano [perché|fin] nessuno lo sentisse.",
+"Marco ha studiato [e|cop] Anna ha lavorato, [ma|avv] entrambi sono felici.",
+"Ho comprato il pane [e|cop] il latte [perché|cau] mia madre non poteva uscire.",
+"[Quando|tem] Marco tornò a casa, era stanco [ma|avv] contento.",
+"Non sono uscito [perché|cau] pioveva [e|cop] faceva freddo.",
+"Studia [affinché|fin] i suoi genitori siano orgogliosi [e|cop] possa trovare un buon lavoro.",
+"[Se|cnd] studierai con impegno, supererai l’esame, [quindi|con] non preoccuparti.",
+"Credo [che|dic] Luca sia partito [oppure|dis] [che|dic] sia rimasto a casa.",
+"[Benché|cnc] fosse stanco, Marco non si fermò [e|cop] continuò a correre [finché|tem] non arrivò a casa.",
+"Ti chiedo [se|int] vuoi venire con noi [o|dis] preferisci restare a casa.",
+"Ha detto [che|dic] sarebbe venuto, [però|avv] non si è visto.",
+"Il professore spiegò [che|dic] la guerra era iniziata [perché|cau] i due stati non si fidavano.",
+"[Poiché|cau] il tempo era brutto, abbiamo rinviato la gita [e|cop] siamo rimasti a casa.",
+"[Anche se|cnc] era tardi, Marco continuò a studiare [perché|cau] voleva superare l’esame."
+];
+const $=id=>document.getElementById(id);
+const SK='congiunzioni-stats-v1';let st={};try{const x=JSON.parse(localStorage.getItem(SK));if(x&&typeof x==='object')st=x}catch(e){}
+let list=[],i=0,score=0,tot=0,checked=false,ms=[];
+const sh=a=>{a=[...a];for(let j=a.length-1;j>0;j--){const k=Math.floor(Math.random()*(j+1));[a[j],a[k]]=[a[k],a[j]]}return a};
+const kinds=s=>{const k=new Set();for(const m of s.matchAll(/\|(\w+)\]/g))k.add(T[m[1]][1]);return k};
+function renderSt(){const r=Object.entries(st).filter(e=>e[1][0]).sort((a,b)=>b[1][0]-a[1][0]);
+$('st').innerHTML=r.length?r.map(([k,v])=>`<p style="margin:4px 0;font:14px system-ui,sans-serif">${T[k][0]} (${GN[T[k][1]]}): ${v[0]} errori su ${v[1]}</p>`).join(''):'<p class="note">Non ci sono ancora errori registrati.</p>'}
+function resetSt(){if(confirm('Azzerare le statistiche?')){st={};try{localStorage.removeItem(SK)}catch(e){}renderSt()}}
+function start(){const l=+$('lv').value;list=sh(S.filter(s=>{const k=kinds(s);return !l||(l===1&&k.size===1&&k.has('c'))||(l===2&&k.size===1&&k.has('s'))||(l===3&&k.size===2)}));i=0;score=0;tot=0;show()}
+function fill(k){const g=$('g'+k).value,t=$('t'+k);t.disabled=!g;t.innerHTML='<option value="">tipo…</option>'+Object.keys(T).filter(c=>T[c][1]===g).map(c=>`<option value="${c}">${T[c][0]}</option>`).join('')}
+function show(){
+if(i>=list.length){$('app').innerHTML=`<div class="card"><p class="res"><b>Fine!</b> Congiunzioni corrette: ${score} su ${tot}.</p><button class="p" onclick="start()">Ricomincia</button></div>`;return}
+checked=false;ms=[];let n=0;
+const h=list[i].replace(/\[([^|\]]+)\|(\w+)\]/g,(_,w,c)=>{ms.push([w,c]);n++;return `<mark>${w}<sup>${n}</sup></mark>`});
+$('app').innerHTML=`<div class="card"><div class="note">Frase ${i+1} di ${list.length}</div><p class="fr">${h}</p><div class="chunks">`+ms.map((m,k)=>`<div class="ch" id="c${k}"><b>${k+1}. ${m[0]}</b><select id="g${k}" onchange="fill(${k})"><option value="">coordinante o subordinante?</option><option value="c">Coordinante</option><option value="s">Subordinante</option></select><select id="t${k}" disabled><option value="">tipo…</option></select></div>`).join('')+`</div></div><div class="bar"><button class="p" id="vb" onclick="verify()">Verifica</button><button id="nb" onclick="i++;show()" disabled>Avanti</button></div><div id="out" class="res"></div>`;
+$('pt').textContent='Punti: '+score+'/'+tot}
+function verify(){
+if(checked)return;
+if(ms.some((m,k)=>!$('g'+k).value||!$('t'+k).value)){$('out').textContent='Per ogni congiunzione scegli sia coordinante/subordinante sia il tipo.';return}
+checked=true;let ok=0;
+ms.forEach((m,k)=>{const c=m[1],g=T[c][1],good=$('g'+k).value===g&&$('t'+k).value===c;tot++;st[c]=st[c]||[0,0];st[c][1]++;
+if(good){ok++;score++}else st[c][0]++;
+$('g'+k).disabled=true;$('t'+k).disabled=true;$('c'+k).classList.add(good?'ok':'ko');
+if(!good)$('c'+k).insertAdjacentHTML('beforeend',`<div class="sol">Corretto: congiunzione <b>${GN[g]}</b> <b>${T[c][0].toLowerCase()}</b>.<br>${T[c][2]}</div>`)});
+try{localStorage.setItem(SK,JSON.stringify(st))}catch(e){}renderSt();
+$('out').textContent=ok===ms.length?'Perfetto!':`${ok} su ${ms.length} corrette.`;
+$('nb').disabled=false;$('vb').disabled=true;$('pt').textContent='Punti: '+score+'/'+tot}
+$('lv').onchange=start;
+$('ref').innerHTML=['c','s'].map(g=>`<dt style="color:var(--ac)">Congiunzioni ${GN[g]==='coordinante'?'coordinanti':'subordinanti'}</dt>`+Object.keys(T).filter(c=>T[c][1]===g).map(c=>`<dt>${T[c][0]}</dt><dd>${T[c][2]}</dd>`).join('')).join('');
+renderSt();start();
+</script></body></html>
